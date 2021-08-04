@@ -149,11 +149,11 @@ classdef Plotter < handle
 
         function plot(obj)
 
-            if plot_type == 1
+            if obj.plot_type == 1
 
                 obj.plot_1();
 
-            elseif plot_type == 2
+            elseif obj.plot_type == 2
 
                 obj.plot_2();
 
@@ -161,11 +161,26 @@ classdef Plotter < handle
 
         end
 
+        function save(obj)
+
+            if obj.plot_type == 1
+
+                fname = obj.save_filename;
+                
+            elseif obj.plot_type == 2
+
+                fname = [obj.save_filename '_errorbar'];
+
+            end
+
+            exportgraphics(obj.fig, strcat(fname, '.png'));
+            savefig(obj.fig, fname);
+
+        end
+
     end
 
     methods (Access = private)
-
-        
 
         function plot_1(obj)
 
@@ -257,7 +272,7 @@ classdef Plotter < handle
 
                         obj.plot_handle(ax1, data_x, data_y, ...
                             'LineStyle', obj.linestyles{linestyle_cnt}, ...
-                            'Color', obj.colors{color_cnt, :}, ...
+                            'Color', obj.colors{i, j}(color_cnt, :), ...
                             'LineWidth', obj.linewidths{linewidth_cnt});
 
                         cnt2 = cnt2 + 1;
@@ -280,7 +295,7 @@ classdef Plotter < handle
 
             if strcmp(obj.legend_type, 'one-for-all')
 
-                legend(obj.legend{:}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+                legend(obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
 
             end
 
@@ -312,11 +327,10 @@ classdef Plotter < handle
 
                     ax1 = subplot(obj.num_rows, obj.num_cols, cnt1);
                     ax1_position = ax1.Position;
-                    ax2 = axes('Position', [ax1_position(1) + inset_loc(1) * ax1_position(3),...
-                        ax1_position(2) + inset_loc(2) * ax1_position(4),...
-                        (inset_loc(3)) * ax1_position(3),...
-                        (inset_loc(4)) * ax1_position(4)]);
-
+                    ax2 = axes('Position', [ax1_position(1) + obj.inset_position(1) * ax1_position(3), ...
+                                    ax1_position(2) + obj.inset_position(2) * ax1_position(4), ...
+                                    (obj.inset_position(3)) * ax1_position(3), ...
+                                    (obj.inset_position(4)) * ax1_position(4)]);
 
                     obj.axs{end + 1} = ax1;
                     obj.axs_inset{end + 1} = ax2;
@@ -344,8 +358,6 @@ classdef Plotter < handle
                             ixs_ = obj.indexes:length(data_x)
 
                         end
-
-
 
                         if ~isnumeric(obj.inset_indexes)
 
@@ -419,13 +431,13 @@ classdef Plotter < handle
 
                         obj.plot_handle(ax1, data_x, data_y, ...
                             'LineStyle', obj.linestyles{linestyle_cnt}, ...
-                            'Color', obj.colors{color_cnt, :}, ...
+                            'Color', obj.colors{i, j}(color_cnt, :), ...
                             'LineWidth', obj.linewidths{linewidth_cnt});
-                        
-                        bar(ax2, cnt2, mean(data_y(ixs_inset)),...
-                            'FaceColor', obj.colors{color_cnt, :});
 
-                        errorbar(ax2, cnt2, mean(data_y(steady_state_ixs)), std(data_y(steady_state_ixs)));
+                        bar(ax2, cnt2, mean(data_y(ixs_inset)), ...
+                            'FaceColor', obj.colors{i, j}(color_cnt, :));
+
+                        errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset)));
 
                         cnt2 = cnt2 + 1;
 
@@ -448,7 +460,7 @@ classdef Plotter < handle
 
             if strcmp(obj.legend_type, 'one-for-all')
 
-                legend(obj.legend{:}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+                legend(obj.axs{end}, obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
 
             end
 
@@ -467,8 +479,6 @@ classdef Plotter < handle
             end
 
         end
-
-
 
         function check_xlabel(obj)
 
@@ -504,29 +514,37 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == num_rows
+            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == obj.num_rows
 
                 xlabel_ = obj.xlabel;
                 obj.xlabel = {};
 
                 for j = 1:obj.num_cols
 
-                    obj.xlabel{:, j} = xlabel_;
+                    for k = 1:length(xlabel_)
+
+                        obj.xlabel{k, j} = xlabel_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.xlabel) && size(obj.xlabel, 2) == num_cols
+            elseif iscell(obj.xlabel) && size(obj.xlabel, 2) == obj.num_cols
 
                 xlabel_ = obj.xlabel;
                 obj.xlabel = {};
 
                 for i = 1:obj.num_rows
 
-                    obj.xlabel{i, :} = xlabel_;
+                    for k = 1:length(xlabel_)
+
+                        obj.xlabel{i, k} = xlabel_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == num_rows && size(obj.xlabel, 2) == num_cols
+            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == obj.num_rows && size(obj.xlabel, 2) == obj.num_cols
 
                 disp(['x-axis labels are good!']);
 
@@ -573,29 +591,37 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == num_rows
+            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == obj.num_rows
 
                 ylabel_ = obj.ylabel;
                 obj.ylabel = {};
 
                 for j = 1:obj.num_cols
 
-                    obj.ylabel{:, j} = ylabel_;
+                    for k = 1:length(ylabel_)
+
+                        obj.ylabel{k, j} = ylabel_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.ylabel) && size(obj.ylabel, 2) == num_cols
+            elseif iscell(obj.ylabel) && size(obj.ylabel, 2) == obj.num_cols
 
                 ylabel_ = obj.ylabel;
                 obj.ylabel = {};
 
                 for i = 1:obj.num_rows
 
-                    obj.ylabel{i, :} = ylabel_;
+                    for k = 1:length(ylabel_)
+
+                        obj.ylabel{i, k} = ylabel_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == num_rows && size(obj.ylabel, 2) == num_cols
+            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == obj.num_rows && size(obj.ylabel, 2) == obj.num_cols
 
                 disp(['y-axis labels are good!']);
 
@@ -642,29 +668,37 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == num_rows
+            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == obj.num_rows
 
                 subtitle_ = obj.subtitle;
                 obj.subtitle = {};
 
                 for j = 1:obj.num_cols
 
-                    obj.subtitle{:, j} = subtitle_;
+                    for k = 1:length(subtitle_)
+
+                        obj.subtitle{k, j} = subtitle_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.subtitle) && size(obj.subtitle, 2) == num_cols
+            elseif iscell(obj.subtitle) && size(obj.subtitle, 2) == obj.num_cols
 
                 subtitle_ = obj.subtitle;
                 obj.subtitle = {};
 
                 for i = 1:obj.num_rows
 
-                    obj.subtitle{i, :} = subtitle_;
+                    for k = 1:length(subtitle_)
+
+                        obj.subtitle{i, k} = subtitle_{k};
+
+                    end
 
                 end
 
-            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == num_rows && size(obj.subtitle, 2) == num_cols
+            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == obj.num_rows && size(obj.subtitle, 2) == obj.num_cols
 
                 disp(['Subtitles are good!']);
 
@@ -744,7 +778,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.legend) && size(obj.legend, 1) == num_rows && size(obj.legend, 2) == num_cols
+            elseif iscell(obj.legend) && size(obj.legend, 1) == obj.num_rows && size(obj.legend, 2) == obj.num_cols
 
                 disp(['Legends are good!']);
 
@@ -824,7 +858,6 @@ classdef Plotter < handle
 
         function check_xdata(obj)
 
-
             for i = 1:obj.num_rows
 
                 for j = 1:obj.num_cols
@@ -835,13 +868,14 @@ classdef Plotter < handle
 
                             warning(['You did not include the x-data! It is being created by default'])
                             obj.dataset{i, j}{k} = {1:length(obj.dataset{i, j}{k}{:}), obj.dataset{i, j}{k}{:}}
-                        
+
+                        end
+
                     end
 
                 end
 
             end
-
 
         end
 
