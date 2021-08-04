@@ -5,7 +5,7 @@ classdef Plotter < handle
 
         dataset
         figure_position
-		plot_type;
+        plot_type;
 
         colors
         linestyles
@@ -54,6 +54,7 @@ classdef Plotter < handle
 
         fig;
         axs;
+        axs_inset;
         num_rows;
         num_cols;
 
@@ -67,7 +68,7 @@ classdef Plotter < handle
             obj.num_rows = size(obj.dataset, 1);
             obj.num_cols = size(obj.dataset, 2);
 
-			obj.plot_type = 1;
+            obj.plot_type = 1;
             obj.figure_position = [0 0 2000 2000];
 
             obj.colors = 'auto';
@@ -110,8 +111,9 @@ classdef Plotter < handle
             obj.title_fontsize = 20;
 
             obj.save_filename = "Plotter_Figure";
-            
+
             nvarargin = length(varargin)
+
             if ~isempty(varargin) && mod(nvarargin, 2) == 0
 
                 for k = 1:2:nvarargin
@@ -132,6 +134,7 @@ classdef Plotter < handle
 
             end
 
+            obj.check_xdata();
             obj.check_xlabel();
             obj.check_ylabel();
             obj.check_subtitle();
@@ -140,10 +143,31 @@ classdef Plotter < handle
             obj.check_color();
 
             obj.axs = {};
+            obj.axs_inset = {};
 
         end
 
         function plot(obj)
+
+            if plot_type == 1
+
+                obj.plot_1();
+
+            elseif plot_type == 2
+
+                obj.plot_2();
+
+            end
+
+        end
+
+    end
+
+    methods (Access = private)
+
+        
+
+        function plot_1(obj)
 
             obj.fig = figure('Position', obj.figure_position, 'Units', 'pixels', 'visible', obj.visibility)
 
@@ -177,74 +201,73 @@ classdef Plotter < handle
 
                         data_x = data_x(ixs_);
                         data_y = data_y(ixs_);
-						
+
                         linestyle_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
                         linewidth_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
                         color_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
-                        
+
                         if obj.grouping
 
                             successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
-                            skip_cnt = fix((cnt2 - 1) , obj.grouping_number) + 1;
-                            
-                            if strcmp(obj.linestyle_group , 'successive')
+                            skip_cnt = fix((cnt2 - 1), obj.grouping_number) + 1;
+
+                            if strcmp(obj.linestyle_group, 'successive')
 
                                 linestyle_cnt = successive_cnt;
 
-                            elseif strcmp(obj.line_group , 'skip')
+                            elseif strcmp(obj.line_group, 'skip')
 
                                 linestyle_cnt = skip_cnt;
 
                             else
 
                                 error("Please assign proper grouping type!")
-                            
+
                             end
 
-                            if strcmp(obj.linewidth_group , 'successive')
+                            if strcmp(obj.linewidth_group, 'successive')
 
                                 linewidth_cnt = successive_cnt;
 
-                            elseif strcmp(obj.linewidth_group , 'skip')
+                            elseif strcmp(obj.linewidth_group, 'skip')
 
                                 linewidth_cnt = skip_cnt;
 
                             else
 
                                 error("Please assign proper grouping type!")
-                            
+
                             end
 
-                            if strcmp(obj.color_group , 'successive')
+                            if strcmp(obj.color_group, 'successive')
 
                                 color_cnt = successive_cnt;
 
-                            elseif strcmp(obj.color_group , 'skip')
+                            elseif strcmp(obj.color_group, 'skip')
 
                                 color_cnt = skip_cnt;
 
                             else
 
                                 error("Please assign proper grouping type!")
-                            
-                            end
 
+                            end
 
                         end
 
-                        obj.plot_handle(ax1, data_x, data_y,...
+                        obj.plot_handle(ax1, data_x, data_y, ...
                             'LineStyle', obj.linestyles{linestyle_cnt}, ...
                             'Color', obj.colors{color_cnt, :}, ...
                             'LineWidth', obj.linewidths{linewidth_cnt});
-						
-						cnt2 = cnt2 + 1;
+
+                        cnt2 = cnt2 + 1;
                     end
 
                     xlabel(ax1, obj.xlabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
                     ylabel(ax1, obj.ylabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
                     title(ax1, obj.subtitle{i, j}, 'Interpreter', 'latex', 'FontSize', obj.subtitle_fontsize);
 
-                    if strcmp(obj.legend_type , 'each')
+                    if strcmp(obj.legend_type, 'each')
                         legend(ax1, obj.legend{i, j}, 'Location', obj.legend_location, 'Orientation', 'horizontal', 'Interpreter', 'latex', 'FontSize', obj.legend_fontsize);
                     end
 
@@ -255,21 +278,21 @@ classdef Plotter < handle
 
             end
 
-            if strcmp(obj.legend_type , 'one-for-all')
+            if strcmp(obj.legend_type, 'one-for-all')
 
-                legend(obj.legend{1}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+                legend(obj.legend{:}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
 
             end
 
             sgtitle(obj.title, 'Interpreter', 'latex', 'FontSize', obj.title_fontsize);
 
-            if obj.xlim == 'auto'
+            if strcmp(obj.xlim, 'auto')
 
                 obj.check_xlim();
 
             end
 
-            if obj.ylim == 'auto'
+            if strcmp(obj.ylim, 'auto')
 
                 obj.check_ylim();
 
@@ -277,36 +300,205 @@ classdef Plotter < handle
 
         end
 
-    end
+        function plot_2(obj)
 
-    methods (Access = private)
+            obj.fig = figure('Position', obj.figure_position, 'Units', 'pixels', 'visible', obj.visibility)
 
-        function check_xlabel(obj)
+            cnt1 = 1
 
-            if obj.xlabel == 'auto';
+            for i = 1:obj.num_rows
 
-                obj.xlabel = {};
+                for j = 1:obj.num_cols
 
-                for i = 1:obj.num_rows
+                    ax1 = subplot(obj.num_rows, obj.num_cols, cnt1);
+                    ax1_position = ax1.Position;
+                    ax2 = axes('Position', [ax1_position(1) + inset_loc(1) * ax1_position(3),...
+                        ax1_position(2) + inset_loc(2) * ax1_position(4),...
+                        (inset_loc(3)) * ax1_position(3),...
+                        (inset_loc(4)) * ax1_position(4)]);
 
-                    for j = 1:obj.num_cols
 
-                        obj.xlabel{i, j} = ['$x$ Datapoint' num2str(i) num2str(j)];
+                    obj.axs{end + 1} = ax1;
+                    obj.axs_inset{end + 1} = ax2;
+
+                    hold(ax1, 'on');
+                    hold(ax2, 'on');
+
+                    cnt2 = 1;
+
+                    for k = 1:length(obj.dataset{i, j})
+
+                        data_x = obj.dataset{i, j}{k}{1};
+                        data_y = obj.dataset{i, j}{k}{2};
+
+                        if ~isnumeric(obj.indexes)
+
+                            ixs_ = 1:length(data_x);
+
+                        elseif isvector(obj.indexes)
+
+                            ixs_ = obj.indexes;
+
+                        else
+
+                            ixs_ = obj.indexes:length(data_x)
+
+                        end
+
+
+
+                        if ~isnumeric(obj.inset_indexes)
+
+                            ixs_inset = 1:length(data_x);
+
+                        elseif isvector(obj.inset_indexes)
+
+                            ixs_inset = obj.inset_indexes
+
+                        else
+
+                            ixs_inset = obj.inset_indexes:length(data_x)
+
+                        end
+
+                        data_x = data_x(ixs_);
+                        data_y = data_y(ixs_);
+
+                        linestyle_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+                        linewidth_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+                        color_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+
+                        if obj.grouping
+
+                            successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
+                            skip_cnt = fix((cnt2 - 1), obj.grouping_number) + 1;
+
+                            if strcmp(obj.linestyle_group, 'successive')
+
+                                linestyle_cnt = successive_cnt;
+
+                            elseif strcmp(obj.line_group, 'skip')
+
+                                linestyle_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                            if strcmp(obj.linewidth_group, 'successive')
+
+                                linewidth_cnt = successive_cnt;
+
+                            elseif strcmp(obj.linewidth_group, 'skip')
+
+                                linewidth_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                            if strcmp(obj.color_group, 'successive')
+
+                                color_cnt = successive_cnt;
+
+                            elseif strcmp(obj.color_group, 'skip')
+
+                                color_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                        end
+
+                        obj.plot_handle(ax1, data_x, data_y, ...
+                            'LineStyle', obj.linestyles{linestyle_cnt}, ...
+                            'Color', obj.colors{color_cnt, :}, ...
+                            'LineWidth', obj.linewidths{linewidth_cnt});
+                        
+                        bar(ax2, cnt2, mean(data_y(ixs_inset)),...
+                            'FaceColor', obj.colors{color_cnt, :});
+
+                        errorbar(ax2, cnt2, mean(data_y(steady_state_ixs)), std(data_y(steady_state_ixs)));
+
+                        cnt2 = cnt2 + 1;
 
                     end
 
+                    xlabel(ax1, obj.xlabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
+                    ylabel(ax1, obj.ylabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
+                    title(ax1, obj.subtitle{i, j}, 'Interpreter', 'latex', 'FontSize', obj.subtitle_fontsize);
+
+                    if strcmp(obj.legend_type, 'each')
+                        legend(ax1, obj.legend{i, j}, 'Location', obj.legend_location, 'Orientation', 'horizontal', 'Interpreter', 'latex', 'FontSize', obj.legend_fontsize);
+                    end
+
+                    hold(ax1, 'off')
+
+                    cnt1 = cnt1 + 1;
                 end
 
-            elseif ischar(obj.xlabel)
+            end
 
-                xlabel_ = obj.xlabel;
-                obj.xlabel = {};
+            if strcmp(obj.legend_type, 'one-for-all')
 
-                for i = 1:obj.num_rows
+                legend(obj.legend{:}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
 
-                    for j = 1:obj.num_cols
+            end
 
-                        obj.xlabel{i, j} = xlabel_;
+            sgtitle(obj.title, 'Interpreter', 'latex', 'FontSize', obj.title_fontsize);
+
+            if strcmp(obj.xlim, 'auto')
+
+                obj.check_xlim();
+
+            end
+
+            if strcmp(obj.ylim, 'auto')
+
+                obj.check_ylim();
+
+            end
+
+        end
+
+
+
+        function check_xlabel(obj)
+
+            if ischar(obj.xlabel)
+
+                if strcmp(obj.xlabel, 'auto')
+                    obj.xlabel = {};
+
+                    for i = 1:obj.num_rows
+
+                        for j = 1:obj.num_cols
+
+                            obj.xlabel{i, j} = ['$x$ Datapoint' num2str(i) num2str(j)];
+
+                        end
+
+                    end
+
+                else
+
+                    xlabel_ = obj.xlabel;
+                    obj.xlabel = {};
+
+                    for i = 1:obj.num_rows
+
+                        for j = 1:obj.num_cols
+
+                            obj.xlabel{i, j} = xlabel_;
+
+                        end
 
                     end
 
@@ -348,30 +540,34 @@ classdef Plotter < handle
 
         function check_ylabel(obj)
 
-            if obj.ylabel == 'auto';
+            if ischar(obj.ylabel)
 
-                obj.ylabel = {};
+                if strcmp(obj.ylabel, 'auto');
 
-                for i = 1:obj.num_rows
+                    obj.ylabel = {};
 
-                    for j = 1:obj.num_cols
+                    for i = 1:obj.num_rows
 
-                        obj.ylabel{i, j} = ['$y$ Datapoint' num2str(i) num2str(j)];
+                        for j = 1:obj.num_cols
+
+                            obj.ylabel{i, j} = ['$y$ Datapoint' num2str(i) num2str(j)];
+
+                        end
 
                     end
 
-                end
+                else
 
-            elseif ischar(obj.ylabel)
+                    ylabel_ = obj.ylabel;
+                    obj.ylabel = {};
 
-                ylabel_ = obj.ylabel;
-                obj.ylabel = {};
+                    for i = 1:obj.num_rows
 
-                for i = 1:obj.num_rows
+                        for j = 1:obj.num_cols
 
-                    for j = 1:obj.num_cols
+                            obj.ylabel{i, j} = ylabel_;
 
-                        obj.ylabel{i, j} = ylabel_;
+                        end
 
                     end
 
@@ -413,30 +609,34 @@ classdef Plotter < handle
 
         function check_subtitle(obj)
 
-            if obj.subtitle == 'auto';
+            if ischar(obj.subtitle)
 
-                obj.subtitle = {};
+                if strcmp(obj.subtitle, 'auto');
 
-                for i = 1:obj.num_rows
+                    obj.subtitle = {};
 
-                    for j = 1:obj.num_cols
+                    for i = 1:obj.num_rows
 
-                        obj.subtitle{i, j} = ['Subtitle' num2str(i) num2str(j)];
+                        for j = 1:obj.num_cols
+
+                            obj.subtitle{i, j} = ['Subtitle' num2str(i) num2str(j)];
+
+                        end
 
                     end
 
-                end
+                else
 
-            elseif ischar(obj.subtitle)
+                    subtitle_ = obj.subtitle;
+                    obj.subtitle = {};
 
-                subtitle_ = obj.subtitle;
-                obj.subtitle = {};
+                    for i = 1:obj.num_rows
 
-                for i = 1:obj.num_rows
+                        for j = 1:obj.num_cols
 
-                    for j = 1:obj.num_cols
+                            obj.subtitle{i, j} = subtitle_;
 
-                        obj.subtitle{i, j} = subtitle_;
+                        end
 
                     end
 
@@ -478,7 +678,7 @@ classdef Plotter < handle
 
         function check_title(obj)
 
-            if obj.title == 'auto';
+            if strcmp(obj.title, 'auto');
 
                 obj.title = 'Main Title';
 
@@ -488,36 +688,40 @@ classdef Plotter < handle
 
         function check_legend(obj)
 
-            if obj.legend == 'auto';
+            if ischar(obj.legend)
 
-                obj.legend = {};
+                if strcmp(obj.legend, 'auto');
 
-                for i = 1:obj.num_rows
+                    obj.legend = {};
 
-                    for j = 1:obj.num_cols
+                    for i = 1:obj.num_rows
 
-                        for k = 1:length(obj.dataset{i, j})
+                        for j = 1:obj.num_cols
 
-                            obj.legend{i, j}{k} = ['Legend' num2str(i) num2str(j) num2str(k)];
+                            for k = 1:length(obj.dataset{i, j})
+
+                                obj.legend{i, j}{k} = ['Legend' num2str(i) num2str(j) num2str(k)];
+
+                            end
 
                         end
 
                     end
 
-                end
+                else
 
-            elseif ischar(obj.legend)
+                    legend_ = obj.legend;
+                    obj.legend = {};
 
-                legend_ = obj.legend;
-                obj.legend = {};
+                    for i = 1:obj.num_rows
 
-                for i = 1:obj.num_rows
+                        for j = 1:obj.num_cols
 
-                    for j = 1:obj.num_cols
+                            for k = 1:length(obj.dataset{i, j})
 
-                        for k = 1:length(obj.dataset{i, j})
+                                obj.legend{i, j}{k} = legend_;
 
-                            obj.legend{i, j}{k} = legend_;
+                            end
 
                         end
 
@@ -554,20 +758,21 @@ classdef Plotter < handle
 
         function check_color(obj)
 
-            if obj.colors == 'auto';
+            if strcmp(obj.colors, 'auto');
 
-                obj.colors =  {};
+                obj.colors = {};
+
                 for i = 1:obj.num_rows
 
                     for j = 1:obj.num_cols
 
-						if ~obj.grouping
-							
-							obj.grouping_number = 1;
-						
-						end
+                        if ~obj.grouping
 
-						obj.colors{i, j} = distinguishable_colors(length(obj.dataset{i, j}) / obj.grouping_number);
+                            obj.grouping_number = 1;
+
+                        end
+
+                        obj.colors{i, j} = distinguishable_colors(length(obj.dataset{i, j}) / obj.grouping_number);
 
                     end
 
@@ -614,6 +819,29 @@ classdef Plotter < handle
                 obj.axs{k}.YLim(2) = max_axes_ylim_(2);
 
             end
+
+        end
+
+        function check_xdata(obj)
+
+
+            for i = 1:obj.num_rows
+
+                for j = 1:obj.num_cols
+
+                    for k = 1:length(obj.dataset{i, j})
+
+                        if length(obj.dataset{i, j}{k}) == 1
+
+                            warning(['You did not include the x-data! It is being created by default'])
+                            obj.dataset{i, j}{k} = {1:length(obj.dataset{i, j}{k}{:}), obj.dataset{i, j}{k}{:}}
+                        
+                    end
+
+                end
+
+            end
+
 
         end
 
