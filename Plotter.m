@@ -35,6 +35,9 @@ classdef Plotter < handle
         inset_position
         inset_indexes
 
+        shade_type
+        shade_direction
+
         grouping
         grouping_number
         line_group
@@ -99,6 +102,9 @@ classdef Plotter < handle
             obj.inset_position = [0.6 0.6 0.3 0.3];
             obj.inset_indexes = 'all';
 
+            obj.shade_type = 'std'
+            obj.shade_direction = 'row' % 'column'
+
             obj.grouping = false;
             obj.grouping_number = 3;
             obj.linestyle_group = 'successive';
@@ -157,6 +163,10 @@ classdef Plotter < handle
 
                 obj.plot_2();
 
+            elseif obj.plot_type == 3
+
+                obj.plot_3();
+
             end
 
         end
@@ -166,7 +176,7 @@ classdef Plotter < handle
             if obj.plot_type == 1
 
                 fname = obj.save_filename;
-                
+
             elseif obj.plot_type == 2
 
                 fname = [obj.save_filename '_errorbar'];
@@ -461,6 +471,139 @@ classdef Plotter < handle
             if strcmp(obj.legend_type, 'one-for-all')
 
                 legend(obj.axs{end}, obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+
+            end
+
+            sgtitle(obj.title, 'Interpreter', 'latex', 'FontSize', obj.title_fontsize);
+
+            if strcmp(obj.xlim, 'auto')
+
+                obj.check_xlim();
+
+            end
+
+            if strcmp(obj.ylim, 'auto')
+
+                obj.check_ylim();
+
+            end
+
+        end
+
+        function plot_3(obj)
+
+            obj.fig = figure('Position', obj.figure_position, 'Units', 'pixels', 'visible', obj.visibility)
+
+            cnt1 = 1
+
+            for i = 1:obj.num_rows
+
+                for j = 1:obj.num_cols
+
+                    ax1 = subplot(obj.num_rows, obj.num_cols, cnt1);
+                    obj.axs{end + 1} = ax1;
+
+                    hold(ax1, 'on');
+
+                    cnt2 = 1;
+
+                    for k = 1:length(obj.dataset{i, j})
+
+                        data_x = obj.dataset{i, j}{k}{1};
+                        data_y = obj.dataset{i, j}{k}{2};
+
+                        if ~isnumeric(obj.indexes)
+
+                            ixs_ = 1:length(data_x);
+
+                        else
+
+                            ixs_ = obj.indexes;
+
+                        end
+
+                        data_x = data_x(ixs_);
+                        data_y = data_y(ixs_);
+
+                        linestyle_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+                        linewidth_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+                        color_cnt = mod(cnt2 - 1, length(obj.dataset{i, j})) + 1;
+
+                        if obj.grouping
+
+                            successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
+                            skip_cnt = fix((cnt2 - 1), obj.grouping_number) + 1;
+
+                            if strcmp(obj.linestyle_group, 'successive')
+
+                                linestyle_cnt = successive_cnt;
+
+                            elseif strcmp(obj.line_group, 'skip')
+
+                                linestyle_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                            if strcmp(obj.linewidth_group, 'successive')
+
+                                linewidth_cnt = successive_cnt;
+
+                            elseif strcmp(obj.linewidth_group, 'skip')
+
+                                linewidth_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                            if strcmp(obj.color_group, 'successive')
+
+                                color_cnt = successive_cnt;
+
+                            elseif strcmp(obj.color_group, 'skip')
+
+                                color_cnt = skip_cnt;
+
+                            else
+
+                                error("Please assign proper grouping type!")
+
+                            end
+
+                        end
+
+                        obj.plot_handle(ax1, data_x, data_y, ...
+                            'LineStyle', obj.linestyles{linestyle_cnt}, ...
+                            'Color', obj.colors{i, j}(color_cnt, :), ...
+                            'LineWidth', obj.linewidths{linewidth_cnt});
+
+                        cnt2 = cnt2 + 1;
+                    end
+
+                    xlabel(ax1, obj.xlabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
+                    ylabel(ax1, obj.ylabel{i, j}, 'Interpreter', 'latex', 'FontSize', obj.label_fontsize);
+                    title(ax1, obj.subtitle{i, j}, 'Interpreter', 'latex', 'FontSize', obj.subtitle_fontsize);
+
+                    if strcmp(obj.legend_type, 'each')
+                        legend(ax1, obj.legend{i, j}, 'Location', obj.legend_location, 'Orientation', 'horizontal', 'Interpreter', 'latex', 'FontSize', obj.legend_fontsize);
+                    end
+
+                    hold(ax1, 'off')
+
+                    cnt1 = cnt1 + 1;
+                end
+
+            end
+
+            if strcmp(obj.legend_type, 'one-for-all')
+
+                legend(obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
 
             end
 
