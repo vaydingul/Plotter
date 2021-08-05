@@ -106,9 +106,9 @@ classdef Plotter < handle
 
             obj.grouping = false;
             obj.grouping_number = 3;
-            obj.linestyle_group = 'successive';
-            obj.linewidth_group = 'successive';
-            obj.color_group = 'successive';
+            obj.linestyle_group = 'none';
+            obj.linewidth_group = 'none';
+            obj.color_group = 'none';
 
             obj.label_fontsize = 15;
             obj.legend_fontsize = 10;
@@ -231,8 +231,8 @@ classdef Plotter < handle
                         data_x = data_x(ixs_);
                         data_y = data_y(ixs_);
 
-                        linestyle_cnt = fix(cnt2 - 1 / length(obj.linestyles)) + 1;
-                        linewidth_cnt = fix(cnt2 - 1 / length(obj.linewidths)) + 1;
+                        linestyle_cnt = fix((cnt2 - 1) / length(obj.linestyles)) + 1;
+                        linewidth_cnt = fix((cnt2 - 1) / length(obj.linewidths)) + 1;
                         color_cnt = mod(cnt2 - 1, length(obj.colors{i, j})) + 1;
 
                         successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
@@ -242,11 +242,11 @@ classdef Plotter < handle
 
                             linestyle_cnt = successive_cnt;
 
-                        elseif strcmp(obj.line_group, 'skip')
+                        elseif strcmp(obj.linestyle_group, 'skip')
 
                             linestyle_cnt = skip_cnt;
 
-                        elseif strcmp(obj.line_group, 'none')
+                        elseif strcmp(obj.linestyle_group, 'none')
 
                             linestyle_cnt = linestyle_cnt;
                         else
@@ -395,8 +395,8 @@ classdef Plotter < handle
                         data_x = data_x(ixs_);
                         data_y = data_y(ixs_);
 
-                        linestyle_cnt = fix(cnt2 - 1 / length(obj.linestyles)) + 1;
-                        linewidth_cnt = fix(cnt2 - 1 / length(obj.linewidths)) + 1;
+                        linestyle_cnt = fix((cnt2 - 1) / length(obj.linestyles)) + 1;
+                        linewidth_cnt = fix((cnt2 - 1) / length(obj.linewidths)) + 1;
                         color_cnt = mod(cnt2 - 1, length(obj.colors{i, j})) + 1;
 
                         successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
@@ -406,11 +406,11 @@ classdef Plotter < handle
 
                             linestyle_cnt = successive_cnt;
 
-                        elseif strcmp(obj.line_group, 'skip')
+                        elseif strcmp(obj.linestyle_group, 'skip')
 
                             linestyle_cnt = skip_cnt;
 
-                        elseif strcmp(obj.line_group, 'none')
+                        elseif strcmp(obj.linestyle_group, 'none')
 
                             linestyle_cnt = linestyle_cnt;
                         else
@@ -599,63 +599,63 @@ classdef Plotter < handle
                     data_x = data_x(ixs_);
                     data_y = data_y(ixs_);
 
-                    linestyle_cnt = fix(cnt2 - 1 / length(obj.linestyles)) + 1;
-                        linewidth_cnt = fix(cnt2 - 1 / length(obj.linewidths)) + 1;
-                        color_cnt = mod(cnt2 - 1, length(obj.colors{i, j})) + 1;
+                    linestyle_cnt = fix((cnt2 - 1) / length(obj.linestyles)) + 1;
+                    linewidth_cnt = fix((cnt2 - 1) / length(obj.linewidths)) + 1;
+                    color_cnt = mod(cnt2 - 1, size(obj.colors{i, 1}, 1)) + 1;
 
-                        successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
-                        skip_cnt = mod((cnt2 - 1), obj.grouping_number) + 1;
+                    successive_cnt = fix((cnt2 - 1) / obj.grouping_number) + 1;
+                    skip_cnt = mod((cnt2 - 1), obj.grouping_number) + 1;
 
-                        if strcmp(obj.linestyle_group, 'successive')
+                    if strcmp(obj.linestyle_group, 'successive')
 
-                            linestyle_cnt = successive_cnt;
+                        linestyle_cnt = successive_cnt;
 
-                        elseif strcmp(obj.line_group, 'skip')
+                    elseif strcmp(obj.linestyle_group, 'skip')
 
-                            linestyle_cnt = skip_cnt;
+                        linestyle_cnt = skip_cnt;
 
-                        elseif strcmp(obj.line_group, 'none')
+                    elseif strcmp(obj.linestyle_group, 'none')
 
-                            linestyle_cnt = linestyle_cnt;
-                        else
+                        linestyle_cnt = linestyle_cnt;
+                    else
 
-                            error("Please assign proper grouping type!")
+                        error("Please assign proper grouping type!")
 
-                        end
+                    end
 
-                        if strcmp(obj.linewidth_group, 'successive')
+                    if strcmp(obj.linewidth_group, 'successive')
 
-                            linewidth_cnt = successive_cnt;
+                        linewidth_cnt = successive_cnt;
 
-                        elseif strcmp(obj.linewidth_group, 'skip')
+                    elseif strcmp(obj.linewidth_group, 'skip')
 
-                            linewidth_cnt = skip_cnt;
-                        elseif strcmp(obj.linewidth_group, 'none')
+                        linewidth_cnt = skip_cnt;
+                    elseif strcmp(obj.linewidth_group, 'none')
 
-                            linewidth_cnt = linewidth_cnt;
-                        else
+                        linewidth_cnt = linewidth_cnt;
+                    else
 
-                            error("Please assign proper grouping type!")
+                        error("Please assign proper grouping type!")
 
-                        end
+                    end
 
-                        if strcmp(obj.color_group, 'successive')
+                    if strcmp(obj.color_group, 'successive')
 
-                            color_cnt = successive_cnt;
+                        color_cnt = successive_cnt;
 
-                        elseif strcmp(obj.color_group, 'skip')
+                    elseif strcmp(obj.color_group, 'skip')
 
-                            color_cnt = skip_cnt;
+                        color_cnt = skip_cnt;
 
-                        elseif strcmp(obj.color_group, 'none')
+                    elseif strcmp(obj.color_group, 'none')
 
-                            color_cnt = color_cnt;
+                        color_cnt = color_cnt;
 
-                        else
+                    else
 
-                            error("Please assign proper grouping type!")
+                        error("Please assign proper grouping type!")
 
-                        end
+                    end
 
                     fill(ax1, [data_x; flipud(data_x)], [data_y + error_; flipud(data_y - error_)], ...
                         obj.colors{i, 1}(color_cnt, :), ...
