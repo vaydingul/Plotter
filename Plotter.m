@@ -461,7 +461,7 @@ classdef Plotter < handle
                         bar(ax2, cnt2, mean(data_y(ixs_inset)), ...
                             'FaceColor', obj.colors{i, j}(color_cnt, :));
 
-                        errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset)));
+                        errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset), 0, 1));
 
                         cnt2 = cnt2 + 1;
 
