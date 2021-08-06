@@ -382,7 +382,7 @@ classdef Plotter < handle
 
                             ixs_inset = 1:length(data_x);
 
-                        elseif isvector(obj.inset_indexes)
+                        elseif isvector(obj.inset_indexes) && length(obj.inset_indexes) > 1
 
                             ixs_inset = obj.inset_indexes;
 
@@ -461,7 +461,7 @@ classdef Plotter < handle
                         bar(ax2, cnt2, mean(data_y(ixs_inset)), ...
                             'FaceColor', obj.colors{i, j}(color_cnt, :));
 
-                        errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset), 0, 1));
+                        errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset)));
 
                         cnt2 = cnt2 + 1;
 
