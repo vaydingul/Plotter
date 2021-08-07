@@ -115,7 +115,7 @@ classdef Plotter < handle
             obj.legend_fontsize = 10;
             obj.subtitle_fontsize = 10;
             obj.title_fontsize = 20;
-            obj.text_fontsize = 6;
+            obj.text_fontsize = 5;
 
 
             obj.save_filename = "Plotter_Figure";
@@ -466,7 +466,7 @@ classdef Plotter < handle
 
                         errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset)));
                         
-                        text(ax2, cnt2, mean(data_y(ixs_inset)) + std(data_y(ixs_inset)) + 0.1, {['$\mu$ = ' num2str(mean(data_y(ixs_inset)), 2)], ['$\sigma$ = ' num2str(std(data_y(ixs_inset)), 2)]}, 'FontSize', obj.text_fontsize, 'HorizontalAlignment', 'center', 'Interpreter', 'latex');
+                        text(ax2, cnt2, mean(data_y(ixs_inset)) + std(data_y(ixs_inset)) + 0.1, {['$\mu$ = ' num2str(mean(data_y(ixs_inset)), 2)], ['$\sigma$ = ' num2str(std(data_y(ixs_inset)), 2)]}, 'FontSize', obj.text_fontsize, 'HorizontalAlignment', 'left', 'Interpreter', 'latex', 'Rotation', 90);
                         cnt2 = cnt2 + 1;
 
                     end
