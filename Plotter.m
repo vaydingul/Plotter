@@ -48,6 +48,7 @@ classdef Plotter < handle
         legend_fontsize
         subtitle_fontsize
         title_fontsize
+        text_fontsize
 
         save_filename
     end
@@ -82,7 +83,7 @@ classdef Plotter < handle
             obj.visibility = true;
             obj.indexes = 'all';
 
-            obj.xlim = 'auto';
+            obj.xlim = 'none';
             obj.ylim = 'auto';
 
             obj.xlabel = 'auto';
@@ -114,7 +115,9 @@ classdef Plotter < handle
             obj.legend_fontsize = 10;
             obj.subtitle_fontsize = 10;
             obj.title_fontsize = 20;
+            obj.text_fontsize = 6;
 
+            
             obj.save_filename = "Plotter_Figure";
 
             nvarargin = length(varargin);
@@ -462,7 +465,8 @@ classdef Plotter < handle
                             'FaceColor', obj.colors{i, j}(color_cnt, :));
 
                         errorbar(ax2, cnt2, mean(data_y(ixs_inset)), std(data_y(ixs_inset)));
-
+                        
+                        text(ax2, cnt2, mean(data_y(ixs_inset)) + std(data_y(ixs_inset)) + 0.1, {['$\mu$ = ' num2str(mean(data_y(ixs_inset)), 2)], ['$\sigma$ = ' num2str(std(data_y(ixs_inset)), 2)]}, 'FontSize', obj.text_fontsize)
                         cnt2 = cnt2 + 1;
 
                     end
@@ -741,7 +745,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == obj.num_rows
+            elseif iscell(obj.xlabel) && size(obj.xlabel, 1) == obj.num_rows && size(obj.xlabel, 2) == 1
 
                 xlabel_ = obj.xlabel;
                 obj.xlabel = {};
@@ -756,7 +760,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.xlabel) && size(obj.xlabel, 2) == obj.num_cols
+            elseif iscell(obj.xlabel) && size(obj.xlabel, 2) == obj.num_cols && size(obj.xlabel, 1) == 1
 
                 xlabel_ = obj.xlabel;
                 obj.xlabel = {};
@@ -818,7 +822,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == obj.num_rows
+            elseif iscell(obj.ylabel) && size(obj.ylabel, 1) == obj.num_rows && size(obj.ylabel, 2) == 1
 
                 ylabel_ = obj.ylabel;
                 obj.ylabel = {};
@@ -833,7 +837,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.ylabel) && size(obj.ylabel, 2) == obj.num_cols
+            elseif iscell(obj.ylabel) && size(obj.ylabel, 2) == obj.num_cols && size(obj.ylabel, 1) == 1
 
                 ylabel_ = obj.ylabel;
                 obj.ylabel = {};
@@ -895,7 +899,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == obj.num_rows
+            elseif iscell(obj.subtitle) && size(obj.subtitle, 1) == obj.num_rows && size(obj.subtitle, 2) == 1
 
                 subtitle_ = obj.subtitle;
                 obj.subtitle = {};
@@ -910,7 +914,7 @@ classdef Plotter < handle
 
                 end
 
-            elseif iscell(obj.subtitle) && size(obj.subtitle, 2) == obj.num_cols
+            elseif iscell(obj.subtitle) && size(obj.subtitle, 2) == obj.num_cols && size(obj.subtitle, 1) == 1
 
                 subtitle_ = obj.subtitle;
                 obj.subtitle = {};
@@ -1045,19 +1049,23 @@ classdef Plotter < handle
 
         function check_xlim(obj)
 
-            for k = 1:length(obj.axs)
+            if strcmp(obj.xlim, 'auto')
 
-                axes_xlims_(k, :) = obj.axs{k}.XLim;
+                for k = 1:length(obj.axs)
 
-            end
+                    axes_xlims_(k, :) = obj.axs{k}.XLim;
 
-            min_axes_xlim_ = min(axes_xlims_, [], 1);
-            max_axes_xlim_ = max(axes_xlims_, [], 1);
+                end
 
-            for k = 1:length(obj.axs)
+                min_axes_xlim_ = min(axes_xlims_, [], 1);
+                max_axes_xlim_ = max(axes_xlims_, [], 1);
 
-                obj.axs{k}.XLim(1) = min_axes_xlim_(1);
-                obj.axs{k}.XLim(2) = max_axes_xlim_(2);
+                for k = 1:length(obj.axs)
+
+                    obj.axs{k}.XLim(1) = min_axes_xlim_(1);
+                    obj.axs{k}.XLim(2) = max_axes_xlim_(2);
+
+                end
 
             end
 
@@ -1065,19 +1073,23 @@ classdef Plotter < handle
 
         function check_ylim(obj)
 
-            for k = 1:length(obj.axs)
+            if strcmp(obj.ylim, 'auto')
 
-                axes_ylims_(k, :) = obj.axs{k}.YLim;
+                for k = 1:length(obj.axs)
 
-            end
+                    axes_ylims_(k, :) = obj.axs{k}.YLim;
 
-            min_axes_ylim_ = min(axes_ylims_, [], 1);
-            max_axes_ylim_ = max(axes_ylims_, [], 1);
+                end
 
-            for k = 1:length(obj.axs)
+                min_axes_ylim_ = min(axes_ylims_, [], 1);
+                max_axes_ylim_ = max(axes_ylims_, [], 1);
 
-                obj.axs{k}.YLim(1) = min_axes_ylim_(1);
-                obj.axs{k}.YLim(2) = max_axes_ylim_(2);
+                for k = 1:length(obj.axs)
+
+                    obj.axs{k}.YLim(1) = min_axes_ylim_(1);
+                    obj.axs{k}.YLim(2) = max_axes_ylim_(2);
+
+                end
 
             end
 
