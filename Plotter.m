@@ -221,15 +221,7 @@ classdef Plotter < handle
                         data_x = obj.dataset{i, j}{k}{1};
                         data_y = obj.dataset{i, j}{k}{2};
 
-                        if ~isnumeric(obj.indexes)
-
-                            ixs_ = 1:length(data_x);
-
-                        else
-
-                            ixs_ = obj.indexes;
-
-                        end
+                        ixs_ = obj.check_indexes(obj.indexes, data_x, k)
 
                         data_x = data_x(ixs_);
                         data_y = data_y(ixs_);
@@ -311,33 +303,9 @@ classdef Plotter < handle
                         data_x = obj.dataset{i, j}{k}{1};
                         data_y = obj.dataset{i, j}{k}{2};
 
-                        if ~isnumeric(obj.indexes)
+                        ixs_ = obj.check_indexes(obj.indexes, data_x, k)
 
-                            ixs_ = 1:length(data_x);
-
-                        elseif isvector(obj.indexes)
-
-                            ixs_ = obj.indexes;
-
-                        else
-
-                            ixs_ = obj.indexes:length(data_x);
-
-                        end
-
-                        if ~isnumeric(obj.inset_indexes)
-
-                            ixs_inset = 1:length(data_x);
-
-                        elseif isvector(obj.inset_indexes) && length(obj.inset_indexes) > 1
-
-                            ixs_inset = obj.inset_indexes;
-
-                        else
-
-                            ixs_inset = obj.inset_indexes:length(data_x);
-
-                        end
+                        ixs_inset = obj.check_indexes(obj.inset_indexes, data_x, k)
 
                         data_x = data_x(ixs_);
                         data_y = data_y(ixs_);
@@ -478,15 +446,7 @@ classdef Plotter < handle
                     data_x = dataset_x{i}{j}(:, 1);
                     data_y = data_mean;
 
-                    if ~isnumeric(obj.indexes)
-
-                        ixs_ = 1:length(data_x);
-
-                    else
-
-                        ixs_ = obj.indexes;
-
-                    end
+                    ixs = obj.check_indexes(obj.indexes, data_x, j);
 
                     data_x = data_x(ixs_);
                     data_y = data_y(ixs_);
@@ -1053,6 +1013,32 @@ classdef Plotter < handle
             else
 
                 error("Please assign proper grouping type!")
+
+            end
+
+        end
+
+        function indexes_ = check_indexes(obj, indexes, representative_data, k)
+
+            if iscell(indexes) 
+
+                indexes_ = indexes{k}
+
+            else
+
+                if ~isnumeric(indexes)
+
+                    indexes_ = 1:length(representative_data);
+
+                elseif isvector(indexes) && length(indexes) > 1
+
+                    indexes_ = indexes;
+
+                else
+
+                    indexes_ = indexes:length(representative_data);
+
+                end
 
             end
 
