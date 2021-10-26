@@ -77,7 +77,7 @@ classdef Plotter < handle
             
             obj.colors = 'auto';
             obj.linestyles = {'-', ':', '-.', '--'};
-            obj.linewidths = {1, 2, 3};
+            obj.linewidths = {1, 1.5, 2, 2.5, 3, 3.5};
             
             obj.plot_handle = @plot;
             
@@ -253,8 +253,10 @@ classdef Plotter < handle
             
             if strcmp(obj.legend_type, 'one-for-all')
                 
-                legend(obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
-                
+                legend(obj.axs{end}, obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+                obj.axs{end}.Position(4) =  obj.axs{end-1}.Position(4);
+                obj.axs{end}.Position(2) =  obj.axs{end}.Position(2) - (obj.axs{end-1}.Position(2) - obj.axs{end-1}.Position(2));
+
             end
             
             sgtitle(obj.title, 'Interpreter', 'latex', 'FontSize', obj.title_fontsize);
