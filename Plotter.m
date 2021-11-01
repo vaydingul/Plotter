@@ -150,6 +150,7 @@ classdef Plotter < handle
             obj.check_title();
             obj.check_legend();
             obj.check_color();
+            obj.check_plot_handle();
             
             obj.axs = {};
             obj.axs_inset = {};
@@ -228,7 +229,8 @@ classdef Plotter < handle
                         
                         [linestyle_cnt, color_cnt, linewidth_cnt] = obj.check_groupings(cnt2, i, j);
                         
-                        obj.plot_handle(ax1, data_x, data_y, ...
+                        plot_handle_ = obj.plot_handle{i, j};
+                        plot_handle_(ax1, data_x, data_y, ...
                             'LineStyle', obj.linestyles{linestyle_cnt}, ...
                             'Color', obj.colors{i, j}(color_cnt, :), ...
                             'LineWidth', obj.linewidths{linewidth_cnt});
@@ -315,7 +317,8 @@ classdef Plotter < handle
                         
                         [linestyle_cnt, color_cnt, linewidth_cnt] = obj.check_groupings(cnt2, i, j);
                         
-                        obj.plot_handle(ax1, data_x, data_y, ...
+                        plot_handle_ = obj.plot_handle{i, j};
+                        plot_handle_(ax1, data_x, data_y, ...
                             'LineStyle', obj.linestyles{linestyle_cnt}, ...
                             'Color', obj.colors{i, j}(color_cnt, :), ...
                             'LineWidth', obj.linewidths{linewidth_cnt});
@@ -463,10 +466,16 @@ classdef Plotter < handle
                         'EdgeColor', 'none', ...
                         'HandleVisibility', 'off');
                     
-                    obj.plot_handle(ax1, data_x, data_y, ...
+                    
+                    %                     obj.plot_handle(ax1, data_x, data_y, ...
+                    %                         'LineStyle', obj.linestyles{linestyle_cnt}, ...
+                    %                         'Color', obj.colors{i, 1}(color_cnt, :), ...
+                    %                         'LineWidth', obj.linewidths{linewidth_cnt});
+                    plot(ax1, data_x, data_y, ...
                         'LineStyle', obj.linestyles{linestyle_cnt}, ...
                         'Color', obj.colors{i, 1}(color_cnt, :), ...
                         'LineWidth', obj.linewidths{linewidth_cnt});
+                    
                     
                     cnt2 = cnt2 + 1;
                     
@@ -838,6 +847,82 @@ classdef Plotter < handle
                     end
                     
                 end
+                
+            end
+            
+        end
+        
+        function check_plot_handle(obj)
+            
+            if ischar(obj.plot_handle)
+                
+                if strcmp(obj.plot_handle, 'auto')
+                    obj.plot_handle = {};
+                    
+                    for i = 1:obj.num_rows
+                        
+                        for j = 1:obj.num_cols
+                            
+                            obj.plot_handle{i, j} = @plot;
+                            
+                        end
+                        
+                    end
+                    
+                else
+                    
+                    plot_handle_ = obj.plot_handle;
+                    obj.plot_handle = {};
+                    
+                    for i = 1:obj.num_rows
+                        
+                        for j = 1:obj.num_cols
+                            
+                            obj.plot_handle{i, j} = plot_handle_;
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
+            elseif iscell(obj.plot_handle) && size(obj.plot_handle, 1) == obj.num_rows && size(obj.plot_handle, 2) == 1
+                
+                plot_handle_ = obj.plot_handle;
+                obj.plot_handle = {};
+                
+                for j = 1:obj.num_cols
+                    
+                    for k = 1:length(plot_handle_)
+                        
+                        obj.plot_handle{k, j} = plot_handle_{k};
+                        
+                    end
+                    
+                end
+                
+            elseif iscell(obj.plot_handle) && size(obj.plot_handle, 2) == obj.num_cols && size(obj.plot_handle, 1) == 1
+                
+                plot_handle_ = obj.plot_handle;
+                obj.plot_handle = {};
+                
+                for i = 1:obj.num_rows
+                    
+                    for k = 1:length(plot_handle_)
+                        
+                        obj.plot_handle{i, k} = plot_handle_{k};
+                        
+                    end
+                    
+                end
+                
+            elseif iscell(obj.plot_handle) && size(obj.plot_handle, 1) == obj.num_rows && size(obj.plot_handle, 2) == obj.num_cols
+                
+                disp(['Plot handles are good!']);
+                
+            else
+                
+                error("Please assign proper plot handles for the figure");
                 
             end
             
