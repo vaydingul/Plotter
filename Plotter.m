@@ -115,14 +115,14 @@ classdef Plotter < handle
             obj.linewidth_group = 'none';
             obj.color_group = 'none';
             
-            obj.label_fontsize = 15;
-            obj.legend_fontsize = 10;
-            obj.subtitle_fontsize = 20;
-            obj.title_fontsize = 30;
+            obj.label_fontsize = 25;
+            obj.legend_fontsize = 15;
+            obj.subtitle_fontsize = 25;
+            obj.title_fontsize = 40;
             obj.text_fontsize = 7;
             
             obj.save_filename = "Plotter_Figure";
-            obj.save_resolution = 200;
+            obj.save_resolution = 300;
             
             nvarargin = length(varargin);
             
