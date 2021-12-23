@@ -122,7 +122,7 @@ classdef Plotter < handle
             obj.text_fontsize = 7;
             
             obj.save_filename = "Plotter_Figure";
-            obj.save_resolution = 300;
+            obj.save_resolution = 150;
             
             nvarargin = length(varargin);
             
@@ -984,7 +984,7 @@ classdef Plotter < handle
             
             if strcmp(obj.xlim_type, 'row')
                 
-                for k = 1 : size(obj.axs, 2)
+                for k = 1 : size(obj.axs, 1)
                     
                     check_xlim_single(obj.axs(k, :));
                     
@@ -992,7 +992,7 @@ classdef Plotter < handle
                 
             elseif strcmp(obj.xlim_type, 'column')
                 
-                for k = 1 : size(obj.axs, 1)
+                for k = 1 : size(obj.axs, 2)
                     
                     check_xlim_single(obj.axs(:, k));
                     
@@ -1010,7 +1010,7 @@ classdef Plotter < handle
             
             if strcmp(obj.ylim_type, 'row')
                 
-                for k = 1 : size(obj.axs, 2)
+                for k = 1 : size(obj.axs, 1)
                     
                     obj.check_ylim_single(obj.axs(k, :));
                     
@@ -1018,7 +1018,7 @@ classdef Plotter < handle
                 
             elseif strcmp(obj.ylim_type, 'column')
                 
-                for k = 1 : size(obj.axs, 1)
+                for k = 1 : size(obj.axs, 2)
                     
                     obj.check_ylim_single(obj.axs(:, k));
                     
