@@ -79,7 +79,7 @@ classdef Plotter < handle
             
             obj.colors = 'auto';
             obj.linestyles = {'-', ':', '-.', '--'};
-            obj.linewidths = {1, 2, 3};
+            obj.linewidths = {1, 2, 3, 4};
             
             obj.plot_handle = @plot;
             
@@ -306,7 +306,7 @@ classdef Plotter < handle
             
             if strcmp(obj.legend_type, 'one-for-all')
                 
-                legend(obj.axs{end, end}, obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal');
+                legend(obj.axs{end, end}, obj.legend{end, end}, 'Location', 'bestoutside', 'Orientation', 'horizontal', 'FontSize', obj.legend_fontsize);
                 if length(obj.axs) > 1
                     old_height = obj.axs{end}.Position(4);
                     obj.axs{end}.Position(4) =  obj.axs{end-1}.Position(4);
@@ -986,7 +986,7 @@ classdef Plotter < handle
                 
                 for k = 1 : size(obj.axs, 1)
                     
-                    check_xlim_single(obj.axs(k, :));
+                    obj.check_xlim_single(obj.axs(k, :));
                     
                 end
                 
@@ -994,13 +994,13 @@ classdef Plotter < handle
                 
                 for k = 1 : size(obj.axs, 2)
                     
-                    check_xlim_single(obj.axs(:, k));
+                    obj.check_xlim_single(obj.axs(:, k));
                     
                 end
                 
             elseif strcmp(obj.xlim_type, 'all')
                 
-                check_xlim_single(obj.axs(:));
+                obj.check_xlim_single(obj.axs(:));
                 
             end
             
